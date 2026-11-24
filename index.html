@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HostHub Demo – Airbnb Host Command Centre</title>
+<style>
+:root{--bg:#f6f6f4;--card:#fff;--ink:#1c1c1e;--ink2:#46464b;--mut:#6b6b6b;--line:#e4e4e0;--ac:#d70f4e;--ac2:#b00c3f;--on:#fff;--warn:#8a5200;--bad:#a3200f;--ok:#0a6b2b;--okbg:#e7f6ec;--warnbg:#fff3dc;--badbg:#fde8e6;--tint:#fdecf1;--sh:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.07);--sh2:0 24px 48px -12px rgba(16,24,40,.3);--r:14px;--r2:10px;--t:.18s cubic-bezier(.2,.7,.2,1)}
+[data-theme=rose]{--ac:#c8245f;--ac2:#a31a4b;--tint:#fbeaf1;--bg:#faf5f7}
+[data-theme=ocean]{--ac:#2563eb;--ac2:#1d4fbd;--tint:#e8f0fe;--bg:#f3f6fb}
+[data-theme=forest]{--ac:#2f7a3e;--ac2:#235f2f;--tint:#e6f3e9;--bg:#f3f7f3}
+[data-theme=dark]{--bg:#0e0e10;--card:#18181b;--ink:#f4f4f5;--ink2:#d4d4d8;--mut:#a1a1aa;--line:#2c2c31;--ac:#ff5a7a;--ac2:#ff8aa0;--on:#1b0309;--warn:#f5c26b;--bad:#ff8a73;--ok:#6ddb8c;--okbg:#12301c;--warnbg:#33260c;--badbg:#3a1712;--tint:#2a1219;--sh:0 1px 2px rgba(0,0,0,.4);--sh2:0 24px 48px -12px rgba(0,0,0,.7)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,"Helvetica Neue",Arial,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;touch-action:manipulation}
+.skip{position:absolute;left:-999px;top:8px;background:var(--ac);color:var(--on);padding:8px 14px;border-radius:var(--r2);z-index:99}.skip:focus{left:8px}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+nav{background:var(--card);border-right:1px solid var(--line);padding:20px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{display:flex;align-items:center;gap:10px;font:800 21px/1 Inter,"Helvetica Neue",Arial,sans-serif;letter-spacing:-.04em;margin:0 8px 22px;color:var(--ink)}
+.logo i{width:34px;height:34px;border-radius:10px;background:var(--ac);color:var(--on);display:grid;place-items:center}.logo small{display:block;font:500 12px/1.2 Inter,Arial,sans-serif;letter-spacing:0;color:var(--mut);margin-top:3px}
+.np,.ns{display:flex;flex-direction:column;gap:2px}.ns{margin-top:2px}.more{display:none}
+nav button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:none;color:var(--ink2);padding:0 12px;min-height:42px;border-radius:var(--r2);font:inherit;font-size:15px;font-weight:500;cursor:pointer;transition:background var(--t),color var(--t)}
+nav button svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+nav button:hover{background:var(--bg);color:var(--ink)}nav button.on{background:var(--tint);color:var(--ac);font-weight:650}
+.col{display:flex;flex-direction:column;min-width:0}main{padding:32px clamp(16px,3vw,40px);flex:1;width:100%;max-width:1180px;margin:0 auto;outline:0}
+footer{padding:20px;text-align:center;color:var(--mut);font-size:13px;border-top:1px solid var(--line)}
+h2{font:700 28px/1.2 Inter,"Helvetica Neue",Arial,sans-serif;letter-spacing:-.03em;margin:0 0 16px}h3{font-size:17px;font-weight:650;letter-spacing:-.01em;margin:0 0 12px}p{margin:0 0 12px}
+.enter>*{animation:rise .24s cubic-bezier(.2,.7,.2,1) both}@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--sh);transition:box-shadow var(--t),border-color var(--t)}
+.stat{display:flex;flex-direction:column;gap:2px}.stat b{font-size:30px;line-height:1.15;font-weight:750;letter-spacing:-.03em;font-variant-numeric:tabular-nums}.stat span{color:var(--mut);font-size:14px}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 16px;border-radius:var(--r2);font:inherit;font-size:15px;font-weight:600;cursor:pointer;box-shadow:var(--sh);transition:background var(--t),border-color var(--t),transform var(--t)}
+.b:hover{background:var(--bg);border-color:#c9c9c4}.b:active{transform:scale(.98)}
+.b.p{background:var(--ac);border-color:var(--ac);color:var(--on)}.b.p:hover{background:var(--ac2);border-color:var(--ac2)}.b.d{color:var(--bad)}.b.s{min-height:32px;padding:0 12px;font-size:14px}
+.b:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.bar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap}.bar h2,.bar h3{margin:0}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mut);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg)}
+tr:last-child td{border-bottom:0}tbody tr:hover td,table tr:hover td{background:color-mix(in srgb,var(--bg) 60%,transparent)}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:99px;font-size:12.5px;font-weight:600;background:var(--bg);border:1px solid var(--line);color:var(--ink2)}
+.tag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.tag.ok{background:var(--okbg);border-color:transparent;color:var(--ok)}.tag.warn{background:var(--warnbg);border-color:transparent;color:var(--warn)}.tag.bad{background:var(--badbg);border-color:transparent;color:var(--bad)}
+.al{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;margin-bottom:10px;background:var(--warnbg);color:var(--warn);border-radius:var(--r2);font-size:15px}.al b{color:inherit}.al.bad{background:var(--badbg);color:var(--bad)}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.dh{font-size:12.5px;font-weight:600;color:var(--mut);text-align:center;text-transform:uppercase;letter-spacing:.04em}
+.dc{min-height:92px;background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:6px;overflow:hidden}.dc i{font-size:13px;color:var(--mut);font-style:normal;font-weight:600}
+.dc.tdy{border:2px solid var(--ac)}.dc.tdy i{color:var(--ac)}.ch{display:block;color:#fff;font-size:12px;line-height:1.3;border-radius:6px;padding:2px 6px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod{position:fixed;inset:0;background:rgba(10,10,14,.55);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px 16px;overflow:auto;z-index:30;animation:fade .18s ease both}
+.mod>div{background:var(--card);border-radius:18px;padding:24px;width:100%;max-width:580px;box-shadow:var(--sh2);animation:pop .22s cubic-bezier(.2,.7,.2,1) both}
+@keyframes fade{from{opacity:0}}@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}.fg label{font-size:13.5px;font-weight:600;color:var(--ink2);display:flex;flex-direction:column;gap:6px}.fg .w{grid-column:1/-1}
+input,select,textarea{font:inherit;font-size:15px;font-weight:400;min-height:44px;padding:9px 12px;border:1px solid #cfcfca;border-radius:var(--r2);background:var(--card);color:var(--ink);width:100%;transition:border-color var(--t),box-shadow var(--t)}
+[data-theme=dark] input,[data-theme=dark] select,[data-theme=dark] textarea{border-color:#3d3d44}
+input:hover,select:hover,textarea:hover{border-color:var(--mut)}input[type=checkbox]{min-height:0;accent-color:var(--ac)}textarea{min-height:130px;resize:vertical}
+.pv{margin-top:14px;padding:12px 14px;border-radius:var(--r2);background:var(--tint);color:var(--ink);font-size:14.5px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:99px;z-index:40;font-weight:600;box-shadow:var(--sh2);animation:rise .24s ease both}
+.empty{text-align:center;padding:48px 20px;color:var(--ink2)}.empty::before{content:"";display:block;width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:var(--tint);box-shadow:inset 0 0 0 10px var(--card),inset 0 0 0 28px var(--tint)}
+.tour{position:fixed;right:20px;bottom:20px;max-width:340px;background:var(--ink);color:var(--bg);padding:18px;border-radius:var(--r);z-index:35;box-shadow:var(--sh2);animation:rise .24s ease both}.tour b{display:block;margin-bottom:4px}.tour .b{margin-top:10px}
+@media(max-width:800px){.app{display:block}main{padding:20px 16px 24px}h2{font-size:24px}
+ nav{position:fixed;inset:auto 0 0 0;height:auto;padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);z-index:20;overflow:visible}.logo{display:none}
+ .np{flex-direction:row;gap:0}.np button,.more{flex:1;flex-direction:column;gap:2px;min-height:56px;padding:6px 2px;font-size:12px;justify-content:center;text-align:center}.more{display:flex}
+ .ns{display:none;position:absolute;left:8px;right:8px;bottom:calc(100% + 8px);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:8px;box-shadow:var(--sh2);display:none;flex-direction:row;flex-wrap:wrap;gap:4px}nav.open .ns{display:flex;animation:pop .2s ease both}
+ .ns button{width:calc(50% - 2px);min-height:48px}.col{padding-bottom:84px}
+ .grid{grid-template-columns:repeat(2,1fr);gap:12px}.card{padding:16px}.stat b{font-size:24px}.fg{grid-template-columns:1fr}.cg{gap:3px}.dc{min-height:64px;padding:3px}.ch{font-size:11px;padding:1px 3px}
+ th,td{padding:10px 12px}.mod{padding:0;align-items:flex-end}.mod>div{max-width:none;border-radius:20px 20px 0 0;max-height:92vh;overflow:auto;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
+ .toast{bottom:90px}.tour{left:12px;right:12px;bottom:92px;max-width:none}}
+@media(pointer:coarse){.b,.b.s{min-height:44px}input[type=checkbox]{width:22px;height:22px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{nav,.noprint,.toast,.tour,.skip{display:none!important}.app{display:block}main{padding:0;max-width:none}body{background:#fff}.card,.tw{box-shadow:none}.enter>*{animation:none}}
+.demo{position:sticky;top:0;z-index:25;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--ink);color:var(--bg);padding:10px clamp(16px,3vw,40px);font-size:14px}.demo>span:first-child b{background:var(--ac);color:var(--on);padding:2px 8px;border-radius:99px;margin-right:10px;font-size:12px;letter-spacing:.06em}.demo .b{box-shadow:none;text-decoration:none}
+@media print{.demo{display:none!important}}
+</style></head><body>
+<a class="skip" href="#main">Skip to content</a><div class="app"><nav id="nav" aria-label="Main"></nav><div class="col"><div class="demo" role="region" aria-label="Demo notice"><span><b>DEMO</b>Sample data. Some features are locked.</span><span><button class="b s" onclick="tour(0)">Take the tour</button> <a class="b s p" target="_blank" rel="noopener" href="#" id="buy">Get the full version</a></span></div><main id="main" tabindex="-1"></main><footer>All Rights Reserved BrandingStudioCo</footer></div></div>
+<div id="mod"></div><div id="tour"></div>
+<script>
+const K='hosthub_demo_v1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
+let S,view='today',cal=new Date();cal.setDate(1);
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const D=s=>new Date(s+'T00:00:00'),today=()=>iso(new Date());
+const nights=b=>Math.max(0,Math.round((D(b.co)-D(b.ci))/864e5));
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>S.set.cur+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const fd=s=>D(s).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+function load(){try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+ if(!S)S={props:[],book:[],exp:[],set:{theme:'',cur:'$',fee:3,name:''}};['sup','mnt','dmg'].forEach(k=>S[k]=S[k]||[])}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+const prop=id=>S.props.find(p=>p.id==id)||{name:'(deleted property)',cost:0};
+const col=id=>['#d70466','#00756f','#c2410c','#7b0051','#484848','#0a6e8a'][Math.max(0,S.props.findIndex(p=>p.id==id))%6];
+function calc(b){if(b.src=='Blocked')return{n:nights(b),gross:0,fee:0,cost:0,net:0};const p=prop(b.pid),n=nights(b),gross=n*b.rate+ +b.clean,fee=gross*S.set.fee/100,cost=+p.cost||0;const f=+p.fx||1;return{n,gross:gross*f,fee:fee*f,cost:cost*f,net:(gross-fee-cost)*f}}
+const active=b=>b.st!='Cancelled'&&b.src!='Blocked',holds=b=>b.st!='Cancelled';
+const clash=b=>S.book.find(o=>o.id!=b.id&&o.pid==b.pid&&holds(o)&&b.ci<o.co&&b.co>o.ci);
+function toast(t){const e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+function M(h){$('#mod').innerHTML=`<div class=mod onclick="if(event.target==this)X()"><div role="dialog" aria-modal="true">${h}</div></div>`;const f=document.querySelector('#mod input,#mod select,#mod textarea');if(f&&!(window.matchMedia&&matchMedia('(pointer:coarse)').matches))f.focus()}
+function X(){$('#mod').innerHTML=''}
+document.addEventListener('keydown',e=>{if(e.key=='Escape')X()});
+const NAV=[['today','Today'],['book','Bookings'],['cal','Calendar'],['clean','Cleanings'],['ops','Operations'],['guest','Guests'],['money','Money'],['price','Pricing'],['rep','Reports'],['msg','Messages'],['man','House manual'],['props','Properties'],['set','Settings']];
+function go(v){view=v;render()}
+function render(){document.documentElement.dataset.theme=S.set.theme||'';
+ $('#nav').classList.remove('open');$('#nav').innerHTML=navHtml();
+ $('#main').innerHTML=({today:vToday,book:vBook,cal:vCal,clean:vClean,ops:vOps,guest:vGuest,rep:vRep,money:vMoney,price:vPrice,msg:vMsg,man:vMan,props:vProps,set:vSet})[view]();if(view!==lastV){lastV=view;const m=$('#main');m.classList.remove('enter');void m.offsetWidth;m.classList.add('enter')}}
+function emptyP(){return `<div class="card empty"><h3>Start with your first property</h3><p>Add a listing, then log a booking. Today, Calendar and Money fill in on their own.</p><button class="b p" onclick="propForm()">Add property</button> <button class="b" onclick="sample()">Load sample data</button></div>`}
+/* TODAY */
+function vToday(){if(!S.props.length)return `<h2>Welcome${S.set.name?', '+esc(S.set.name):''}</h2>`+emptyP();
+ const t=today(),ym=t.slice(0,7),A=S.book.filter(active),ins=A.filter(b=>b.ci==t),outs=A.filter(b=>b.co==t);
+ const mb=A.filter(b=>b.co.slice(0,7)==ym),net=mb.reduce((s,b)=>s+calc(b).net,0),ex=S.exp.filter(e=>e.date.slice(0,7)==ym).reduce((s,e)=>s+ +e.amt,0);
+ const dim=new Date(+ym.slice(0,4),+ym.slice(5),0).getDate();let nt=0;
+ A.forEach(b=>{for(let d=1;d<=dim;d++){const ds=ym+'-'+String(d).padStart(2,'0');if(b.ci<=ds&&ds<b.co)nt++}});
+ const occ=Math.round(nt/(dim*S.props.length)*100);
+ const turn=A.filter(b=>b.co>=t&&A.some(o=>o.id!=b.id&&o.pid==b.pid&&o.ci==b.co));
+ const unpaid=A.filter(b=>b.st=='Confirmed'&&b.ci<=t),dbl=A.filter(clash);
+ let al='';const low=S.sup.filter(s=>+s.qty<=+s.min).length,urg=S.mnt.filter(m=>m.st!='Done'&&m.pri=='Urgent');
+ if(low)al+=`<div class=al><b>${low} suppl${low>1?'ies are':'y is'} low.</b> <button class="b s" onclick="ops='sup';go('ops')">See shopping list</button></div>`;
+ if(!S.set.bk||(Date.now()-D(S.set.bk))>30*864e5)al+=`<div class=al>${S.set.bk?'It has been over 30 days since your last backup.':'You have not saved a backup yet.'} Your data lives only in this browser. <button class="b s" onclick="backup()">Save backup</button></div>`;
+ repIss().forEach(r=>al+=`<div class=al><b>Repeat issue:</b> ${esc(r.cat)} reported ${r.n} times at ${esc(prop(r.pid).name)} in 90 days. <button class="b s" onclick="ops='mnt';gt='i';go('guest')">Review</button></div>`);
+ urg.forEach(m=>al+=`<div class="al bad"><b>Urgent job:</b> ${esc(m.title)} at ${esc(prop(m.pid).name)}. <button class="b s" onclick="ops='mnt';go('ops')">Open jobs</button></div>`);
+ dbl.forEach(b=>al+=`<div class="al bad"><b>Double booking:</b> ${esc(b.guest)} at ${esc(prop(b.pid).name)} overlaps another stay (${fd(b.ci)}–${fd(b.co)}).</div>`);
+ turn.forEach(b=>al+=`<div class=al><b>Same-day turnover</b> at ${esc(prop(b.pid).name)} on ${fd(b.co)}: ${esc(b.guest)} out, next guest in. Book the cleaner early.</div>`);
+ unpaid.forEach(b=>al+=`<div class=al>Payout not marked paid: ${esc(b.guest)} (${money(calc(b).gross)}). <button class="b s" onclick="paid('${b.id}')">Mark paid</button></div>`);
+ const soon=A.filter(b=>b.ci>t&&b.ci<=iso(new Date(Date.now()+7*864e5))).sort((a,b)=>a.ci<b.ci?-1:1);
+ const li=(a,k)=>a.length?a.map(b=>`<div>${esc(b.guest)} · ${esc(prop(b.pid).name)}</div>`).join(''):`<span style="color:var(--mut)">None ${k}</span>`;
+ return `<h2>Today${S.set.name?' · '+esc(S.set.name):''}</h2><div class=grid>
+ <div class="card stat"><b>${ins.length}</b><span>check-ins today</span></div><div class="card stat"><b>${outs.length}</b><span>check-outs today</span></div>
+ <div class="card stat"><b>${occ}%</b><span>occupancy this month</span></div><div class="card stat"><b>${money(net-ex)}</b><span>profit this month</span></div></div>
+ <h3>Needs attention</h3>${al||'<div class=card>Nothing urgent. All clear.</div>'}
+ <div class=grid style="margin-top:16px"><div class=card><h3>Arriving today</h3>${li(ins,'arriving')}</div><div class=card><h3>Leaving today</h3>${li(outs,'leaving')}</div>
+ <div class=card><h3>Next 7 days</h3>${soon.length?soon.map(b=>`<div>${fd(b.ci)} · ${esc(b.guest)}</div>`).join(''):'<span style="color:var(--mut)">No arrivals</span>'}</div></div>
+ <p style="color:var(--mut)">Profit = booking income minus platform fee, cleaning cost and logged expenses (checkouts this month).</p>`}
+function paid(id){S.book.find(b=>b.id==id).st='Paid';save();render()}
+/* BOOKINGS */
+function vBook(){const L=[...S.book].sort((a,b)=>a.ci<b.ci?1:-1);
+ return `<div class=bar><h2>Bookings</h2><span><button class=b onclick="icsForm()">Import calendar (.ics)</button> <button class="b p" onclick="bookForm()">New booking</button></span></div>`+(L.length?`<div class=tw><table><tr><th>Guest</th><th>Property</th><th>Stay</th><th>Nights</th><th>Income</th><th>You keep</th><th>Status</th><th></th></tr>`+L.map(b=>{const c=calc(b);return `<tr><td>${esc(b.guest)}<br><small>${esc(b.src)}</small></td><td>${esc(prop(b.pid).name)}</td><td>${fd(b.ci)} → ${fd(b.co)}</td><td>${c.n}</td><td>${money(c.gross)}</td><td><b>${money(c.net)}</b></td><td><span class="tag ${b.st=='Paid'?'ok':b.st=='Cancelled'?'bad':'warn'}">${b.st}</span></td><td><button class="b s" onclick="bookForm('${b.id}')">Edit</button></td></tr>`}).join('')+`</table></div>`:'<div class="card empty">No bookings yet.</div>')}
+const opt=(a,v)=>a.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('');
+function bookForm(id){if(!S.props.length){toast('Add a property first');return go('props')}
+ const b=S.book.find(x=>x.id==id)||{pid:S.props[0].id,src:'Airbnb',ci:today(),co:iso(new Date(Date.now()+2*864e5)),rate:S.props[0].rate,clean:S.props[0].clean,st:'Confirmed',guest:''};
+ M(`<h3>${id?'Edit':'New'} booking</h3><div class=fg>
+ <label class=w>Property<select id=f_pid onchange="pickP()">${S.props.map(p=>`<option value="${p.id}" ${b.pid==p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label>
+ <label>Guest name<input id=f_guest value="${esc(b.guest)}" oninput=pv()></label><label>Source<select id=f_src>${opt(['Airbnb','VRBO','Booking.com','Direct','Blocked'],b.src)}</select></label>
+ <label>Check-in<input type=date id=f_ci value="${b.ci}" oninput=pv()></label><label>Check-out<input type=date id=f_co value="${b.co}" oninput=pv()></label>
+ <label>Nightly rate (property currency)<input type=number id=f_rate value="${b.rate}" oninput=pv()></label><label>Cleaning fee charged (property currency)<input type=number id=f_clean value="${b.clean}" oninput=pv()></label>
+ <label class=w>Status<select id=f_st>${opt(['Confirmed','Paid','Cancelled'],b.st)}</select></label></div><div class=pv id=pv></div>
+ <p><button class="b p" onclick="saveBook('${id||''}')">Save booking</button> <button class=b onclick="X()">Cancel</button> ${id?`<button class="b d" onclick="del('book','${id}')">Delete</button>`:''}</p>`);pv()}
+function pickP(){const p=prop($('#f_pid').value);$('#f_rate').value=p.rate;$('#f_clean').value=p.clean;pv()}
+function fb(id){return{id:id||'x',pid:$('#f_pid').value,ci:$('#f_ci').value,co:$('#f_co').value,rate:+$('#f_rate').value||0,clean:+$('#f_clean').value||0,st:$('#f_st').value}}
+function pv(){const b=fb(),c=calc(b),k=clash(b);$('#pv').innerHTML=`${c.n} nights · Guest pays ${money(c.gross)} · Fee ${money(c.fee)} · Cleaner ${money(c.cost)} · <b>You keep ${money(c.net)}</b>`+(k&&b.ci<b.co?`<div style="color:var(--bad);margin-top:6px"><b>Clash:</b> overlaps ${esc(k.guest)} (${fd(k.ci)}–${fd(k.co)})</div>`:'')+extra(b,c)}
+function saveBook(id){const b=fb(id);b.guest=$('#f_guest').value.trim();b.src=$('#f_src').value;
+ if(!b.guest)return toast('Enter the guest name');if(!(b.ci&&b.co&&b.co>b.ci))return toast('Check-out must be after check-in');
+ if(b.st!='Cancelled'){const k=clash(b);if(k&&!confirm('This overlaps '+k.guest+'. Save anyway?'))return}
+ if(b.st!='Cancelled'&&b.src!='Blocked'&&nights(b)<PR(prop(b.pid)).min&&!confirm('This is below the minimum stay of '+PR(prop(b.pid)).min+' nights. Save anyway?'))return
+ if(id){Object.assign(S.book.find(x=>x.id==id),b)}else{b.id=uid();S.book.push(b)}save();X();render()}
+function del(k,id){if(!confirm('Delete this?'))return;S[k]=S[k].filter(x=>x.id!=id);save();X();render()}
+/* CALENDAR */
+function cm(n){cal.setMonth(cal.getMonth()+n);render()}
+function vCal(){const y=cal.getFullYear(),m=cal.getMonth(),st=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+ let h=`<div class=bar><button class=b onclick="cm(-1)">‹ Prev</button><h2>${cal.toLocaleString(undefined,{month:'long'})} ${y}</h2><button class=b onclick="cm(1)">Next ›</button></div><div class=cg>`+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class=dh>${d}</div>`).join('');
+ for(let i=0;i<st;i++)h+='<div></div>';
+ for(let d=1;d<=dim;d++){const ds=iso(new Date(y,m,d));
+  h+=`<div class="dc ${ds==today()?'tdy':''}"><i>${d}</i>`+S.book.filter(b=>holds(b)&&b.ci<=ds&&ds<=b.co).map(b=>`<span class=ch style="background:${col(b.pid)}" title="${esc(b.guest)}">${b.ci==ds?'in ':b.co==ds?'out ':''}${esc(b.guest)}</span>`).join('')+'</div>'}
+ return h+'</div><p>'+S.props.map(p=>`<span class=tag><span style="color:${col(p.id)}">●</span> ${esc(p.name)}</span>`).join(' ')+'</p>'}
+/* CLEANINGS */
+function vClean(){const t=iso(new Date(Date.now()-3*864e5)),A=S.book.filter(active),L=A.filter(b=>b.co>=t).sort((a,b)=>a.co<b.co?-1:1);
+ return `<h2>Cleanings</h2><p style="color:var(--mut)">One clean is scheduled automatically for every checkout.</p><div class=card style="margin-bottom:12px">Cleaner owed: <b>${money(S.book.filter(b=>active(b)&&b.cleaned&&!b.cpaid).reduce((s,b)=>s+(+prop(b.pid).cost||0)*(+prop(b.pid).fx||1),0))}</b> for cleans marked done and not yet paid</div>`+(L.length?`<div class=tw><table><tr><th>Date</th><th>Property</th><th>Guest out</th><th>Next guest</th><th>Cost</th><th>Actions</th></tr>`+L.map(b=>{
+ const nx=A.filter(o=>o.id!=b.id&&o.pid==b.pid&&o.ci>=b.co).sort((a,c)=>a.ci<c.ci?-1:1)[0],same=nx&&nx.ci==b.co;
+ return `<tr><td>${fd(b.co)}</td><td>${esc(prop(b.pid).name)}</td><td>${esc(b.guest)}</td><td>${same?'<span class="tag bad">Same-day turnover</span>':nx?'In '+Math.round((D(nx.ci)-D(b.co))/864e5)+' days':'No booking yet'}</td><td>${money((+prop(b.pid).cost||0)*(+prop(b.pid).fx||1))}</td><td><button class="b s" onclick="chkForm('${b.id}')">Checklist ${Object.values(b.chk||{}).filter(Boolean).length}/${CHK(prop(b.pid)).length}</button> <button class="b s ${b.cleaned?'p':''}" onclick="clean('${b.id}')">${b.cleaned?'Done':'Mark done'}</button> ${b.cleaned?`<button class="b s ${b.cpaid?'p':''}" onclick="cpay('${b.id}')">${b.cpaid?'Cleaner paid':'Mark cleaner paid'}</button>`:''}</td></tr>`}).join('')+`</table></div>`:'<div class="card empty">No cleanings due.</div>')}
+function clean(id){const b=S.book.find(x=>x.id==id);b.cleaned=!b.cleaned;save();render()}
+/* MONEY */
+const CATS=['Supplies','Utilities','Repairs','Insurance','Advertising','Mortgage / rent','Software','Taxes & fees','Other'];
+function vMoney(){const y=today().slice(0,4),A=S.book.filter(b=>active(b)&&b.co.slice(0,4)==y),E=S.exp.filter(e=>e.date.slice(0,4)==y);
+ const rows=S.props.map(p=>{const bs=A.filter(b=>b.pid==p.id),r=bs.reduce((o,b)=>{const c=calc(b);o.g+=c.gross;o.f+=c.fee;o.c+=c.cost;o.n+=c.net;o.d+=c.n;return o},{g:0,f:0,c:0,n:0,d:0});return{p,r}});
+ const tn=rows.reduce((s,x)=>s+x.r.n,0),te=E.reduce((s,e)=>s+ +e.amt,0);
+ return `<div class=bar><h2>Money ${y}</h2><button class="b p" onclick="expForm()">Add expense</button></div><div class=grid>
+ <div class="card stat"><b>${money(tn)}</b><span>booking income kept</span></div><div class="card stat"><b>${money(te)}</b><span>other expenses</span></div><div class="card stat"><b>${money(tn-te)}</b><span>true profit</span></div></div>
+ <h3>Profit by property</h3><div class=tw><table><tr><th>Property</th><th>Nights</th><th>Guest pays</th><th>Platform fee</th><th>Cleaning</th><th>Kept</th><th>Per night</th></tr>`+rows.map(({p,r})=>`<tr><td>${esc(p.name)}</td><td>${r.d}</td><td>${money(r.g)}</td><td>${money(r.f)}</td><td>${money(r.c)}</td><td><b>${money(r.n)}</b></td><td>${r.d?money(r.n/r.d):'–'}</td></tr>`).join('')+`</table></div>
+ <h3 style="margin-top:18px">Expenses</h3>`+(E.length?`<div class=tw><table><tr><th>Date</th><th>Category</th><th>Note</th><th>Amount</th><th></th></tr>`+[...E].sort((a,b)=>a.date<b.date?1:-1).map(e=>`<tr><td>${fd(e.date)}</td><td>${esc(e.cat)}</td><td>${esc(e.note)}</td><td>${money(e.amt)}</td><td><button class="b s d" onclick="del('exp','${e.id}')">Delete</button></td></tr>`).join('')+`</table></div>`:'<div class="card">No expenses logged this year.</div>')}
+function expForm(){M(`<h3>Add expense</h3><div class=fg><label>Date<input type=date id=e_d value="${today()}"></label><label>Category<select id=e_c>${opt(CATS)}</select></label><label>Amount<input type=number id=e_a step=0.01></label><label>Note<input id=e_n></label></div><p><button class="b p" onclick="saveExp()">Save expense</button> <button class=b onclick="X()">Cancel</button></p>`)}
+function saveExp(){const a=+$('#e_a').value;if(!(a>0))return toast('Enter an amount');S.exp.push({id:uid(),date:$('#e_d').value,cat:$('#e_c').value,amt:a,note:$('#e_n').value});save();X();render()}
+/* MESSAGES */
+const TPL=[['Booking confirmed',"Hi {guest}, thanks for booking {property}! You're confirmed for {checkin} to {checkout} ({nights} nights). I'll send check-in details the day before. Message me with any questions. – {host}"],
+['Check-in instructions',"Hi {guest}, you're all set for {checkin}! Wi-Fi: {wifi}. Door code: {code}. {notes} Message me anytime if anything is unclear. – {host}"],
+['Mid-stay check',"Hi {guest}, hope you're settling in at {property}. Is there anything you need? – {host}"],
+['Check-out reminder',"Hi {guest}, a quick reminder that check-out is {checkout}. Please leave used towels in the bath and lock up behind you. Thanks for staying with us! – {host}"],
+['Review request',"Hi {guest}, thank you for staying at {property}. If you enjoyed it, a review would mean a lot, and I'll leave you one too. – {host}"],
+['Late check-out reply',"Hi {guest}, thanks for asking. I'll check whether {property} is free after {checkout} and confirm soon. – {host}"]];
+function vMsg(){if(!S.book.length)return `<h2>Messages</h2><div class="card empty">Add a booking to fill in guest messages automatically.</div>`;
+ return `<h2>Guest messages</h2><div class=fg style="margin-bottom:10px"><label>Booking<select id=m_b onchange=fillMsg()>${[...S.book].sort((a,b)=>a.ci<b.ci?1:-1).map(b=>`<option value="${b.id}">${esc(b.guest)} · ${fd(b.ci)}</option>`).join('')}</select></label>
+ <label>Template<select id=m_t onchange=fillMsg()>${TPL.map((t,i)=>`<option value=${i}>${t[0]}</option>`).join('')}</select></label></div><textarea id=m_x></textarea><p><button class="b p" onclick="copyMsg()">Copy message</button></p>`+'<img alt="" width=1 height=1 src="data:," onerror="fillMsg()" style="display:none">'}
+function fillMsg(){const b=S.book.find(x=>x.id==$('#m_b').value),p=prop(b.pid),v={guest:b.guest.split(' ')[0],property:p.name,checkin:fd(b.ci),checkout:fd(b.co),nights:nights(b),wifi:p.wifi||'(add Wi-Fi)',code:p.code||'(add code)',notes:p.notes||'',host:S.set.name||'Your host'};
+ $('#m_x').value=TPL[$('#m_t').value][1].replace(/\{(\w+)\}/g,(m,k)=>v[k]??m)}
+function copyMsg(){const t=$('#m_x');t.select();try{navigator.clipboard.writeText(t.value)}catch(e){document.execCommand('copy')}toast('Message copied')}
+/* PROPERTIES */
+function vProps(){return `<div class=bar><h2>Properties</h2><button class="b p" onclick="propForm()">Add property</button></div>`+(S.props.length?`<div class=grid>`+S.props.map(p=>`<div class=card><h3 style="color:${col(p.id)}">${esc(p.name)}</h3><div>Nightly ${mp(p.rate,p)} · Cleaning fee ${mp(p.clean,p)}</div><div style="color:var(--mut)">Cleaner costs you ${mp(p.cost,p)}${+p.fx&&+p.fx!=1?' · 1 '+esc(p.cur||'')+' = '+money(p.fx):''}</div><p><button class="b s" onclick="propForm('${p.id}')">Edit</button> <button class="b s" onclick="exportIcs('${p.id}')">Export calendar (.ics)</button></p></div>`).join('')+'</div>':emptyP())}
+function propForm(id){const p=S.props.find(x=>x.id==id)||{name:'',rate:100,clean:40,cost:30,wifi:'',code:'',notes:'',fixed:0,cur:S.set.cur,fx:1};
+ M(`<h3>${id?'Edit':'Add'} property</h3><div class=fg><label class=w>Listing name<input id=p_n value="${esc(p.name)}"></label>
+ <label>Default nightly rate<input type=number id=p_r value="${p.rate}"></label><label>Cleaning fee charged to guest<input type=number id=p_c value="${p.clean}"></label>
+ <label>What your cleaner costs you<input type=number id=p_k value="${p.cost}"></label><label>Wi-Fi name & password<input id=p_w value="${esc(p.wifi)}"></label>
+ <label>Door / lockbox code<input id=p_d value="${esc(p.code)}"></label><label>Property currency symbol<input id=p_cu value="${esc(p.cur||S.set.cur)}" maxlength=3></label><label>1 of it equals (your home currency)<input type=number step=any id=p_fxr value="${p.fx||1}"></label><label class=w>Fixed monthly costs (mortgage, utilities, insurance)<input type=number id=p_x value="${p.fixed||0}"></label><label class=w>Arrival notes (parking, keys)<input id=p_o value="${esc(p.notes)}"></label></div>
+ <p><button class="b p" onclick="saveProp('${id||''}')">Save property</button> <button class=b onclick="X()">Cancel</button> ${id?`<button class="b d" onclick="del('props','${id}')">Delete</button>`:''}</p>`)}
+function saveProp(id){const p={name:$('#p_n').value.trim(),rate:+$('#p_r').value||0,clean:+$('#p_c').value||0,cost:+$('#p_k').value||0,wifi:$('#p_w').value,code:$('#p_d').value,notes:$('#p_o').value,fixed:+$('#p_x').value||0,cur:$('#p_cu').value.trim()||S.set.cur,fx:+$('#p_fxr').value||1};
+ if(!p.name)return toast('Enter a listing name');if(id)Object.assign(S.props.find(x=>x.id==id),p);else{p.id=uid();S.props.push(p)}save();X();render()}
+/* SETTINGS */
+function vSet(){return `<h2>Settings</h2><div class=card><div class=fg><label>Your name<input id=s_n value="${esc(S.set.name)}" onchange="setS()"></label><label>Home currency symbol<input id=s_c value="${esc(S.set.cur)}" maxlength=3 onchange="setS()"></label><label>Quick pick<select onchange="$('#s_c').value=this.value;setS()"><option value="">Choose...</option>${['$','€','£','¥','₹','Rs','AED','CA$','A$'].map(c=>`<option>${c}</option>`).join('')}</select></label>
+ <label>Platform host fee %<input type=number id=s_f step=0.1 value="${S.set.fee}" onchange="setS()"></label><label>Theme<select id=s_t onchange="setS()">${[['','Airbnb'],['rose','Rose'],['ocean','Ocean'],['forest','Forest'],['dark','Dark']].map(t=>`<option value="${t[0]}" ${S.set.theme==t[0]?'selected':''}>${t[1]}</option>`).join('')}</select></label></div></div>
+ <h3 style="margin-top:18px">Backup</h3><div class=card><p>Your data lives only in this browser. Save a backup after big changes.</p><button class="b p" onclick="backup()">Save backup</button> <button class=b onclick="locked('Restore backup')">Load backup</button> <button class=b onclick="sample()">Load sample data</button> <button class="b d" onclick="wipe()">Reset demo</button></div><h3 style="margin-top:18px">Help</h3><div class=card><button class=b onclick="tour(0)">Take the quick tour</button> <p style="color:var(--mut)">HostHub stores everything in this browser on this device. Use the same browser each time and save a backup every month. Properties in another currency: set the symbol and exchange rate in Properties. Expenses, supplies and jobs are entered in your home currency.</p></div>`}
+function setS(){S.set.name=$('#s_n').value;S.set.cur=$('#s_c').value||'$';S.set.fee=+$('#s_f').value||0;S.set.theme=$('#s_t').value;save();render();toast('Saved')}
+function backup(){S.set.bk=today();save();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='hosthub-backup-'+today()+'.json';a.click()}
+function restore(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.props||!d.book)throw 0;S=d;['sup','mnt','dmg'].forEach(k=>S[k]=S[k]||[]);save();render();toast('Backup loaded')}catch(e){toast('That file is not a HostHub backup')}};r.readAsText(f)}
+function wipe(){if(confirm('Erase all properties, bookings and expenses?')){S={props:[],book:[],exp:[],sup:[],mnt:[],dmg:[],set:S.set};save();render()}}
+function sample(){const t=new Date(),a=n=>iso(new Date(t.getFullYear(),t.getMonth(),t.getDate()+n));
+ const p1={id:uid(),name:'Harbor View Studio',rate:120,clean:45,cost:35,wifi:'HarborView-5G / sunnyday22',code:'4821',notes:'Parking is on the left of the building.'},p2={id:uid(),name:'Garden Cottage',rate:165,clean:60,cost:50,wifi:'Cottage-Guest / roses2024',code:'1907',notes:'Spare key is in the lockbox by the gate.'};
+ const B=(p,g,ci,co,r,src,st)=>({id:uid(),pid:p.id,guest:g,src,ci:a(ci),co:a(co),rate:r,clean:p.clean,st});
+ S.props=[p1,p2];p1.fixed=900;p2.fixed=1200;p1.pr={wk:20,lm:15,lmd:7,min:2,seasons:[{name:'Festival week',from:a(12),to:a(18),pct:25}],hol:[]};p2.pr={wk:15,lm:10,lmd:5,min:2,seasons:[],hol:[{name:'Local holiday',date:a(9),pct:30}]};S.book=[B(p1,'Maria Lopez',-6,-2,118,'Airbnb','Paid'),B(p1,'Tom Becker',-2,0,125,'Airbnb','Paid'),B(p1,'Aisha Khan',0,3,120,'VRBO','Confirmed'),B(p2,'Jon Park',-3,1,160,'Airbnb','Paid'),B(p2,'Lena Ortiz',1,5,170,'Direct','Confirmed'),B(p1,'Sam Wright',8,12,130,'Airbnb','Confirmed')];
+ S.exp=[{id:uid(),date:a(-4),cat:'Supplies',amt:48.5,note:'Toiletries restock'},{id:uid(),date:a(-10),cat:'Utilities',amt:92,note:'Electric'},{id:uid(),date:a(-1),cat:'Repairs',amt:35,note:'Shower head'}];
+ S.sup=[{id:uid(),name:'Toilet paper rolls',qty:6,min:10,cost:0.6},{id:uid(),name:'Coffee pods',qty:40,min:20,cost:0.3},{id:uid(),name:'Bath towels',qty:8,min:6,cost:9},{id:uid(),name:'Laundry detergent (L)',qty:1,min:2,cost:7}];
+ S.mnt=[{id:uid(),pid:p1.id,title:'Fix leaking bathroom tap',pri:'High',st:'Open',due:a(3),cost:40},{id:uid(),pid:p2.id,title:'Replace gate lock battery',pri:'Normal',st:'In progress',due:a(6),cost:8},{id:uid(),pid:p1.id,title:'Water heater inspection',pri:'Urgent',st:'Open',due:a(1),cost:0}];
+ S.dmg=[{id:uid(),pid:p2.id,bid:'',date:a(-3),desc:'Broken wine glass set',cost:25,claim:'Not claimed'}];
+ S.book.push(B(p1,'Tom Becker',-40,-37,115,'Airbnb','Paid'));G()['tom becker']={st:'VIP',note:'Very tidy. Offer late check-out when possible.'};G()['aisha khan']={st:'Normal',note:'Prefers a quiet stay. Arrives late.'};
+ S.iss=[{id:uid(),pid:p1.id,date:a(-25),cat:'Wi-Fi',src:'Guest message',note:'Wi-Fi dropped in the evening'},{id:uid(),pid:p1.id,date:a(-6),cat:'Wi-Fi',src:'Review',note:'Slow connection mentioned in review'},{id:uid(),pid:p2.id,date:a(-9),cat:'Noise',src:'Guest message',note:'Road noise at night'}];S.set.done=true;save();view='today';render()}
+/* STAGE 2: PRICING, BREAK-EVEN, CALENDAR SYNC */
+let pp=null;
+const PR=p=>p.pr||(p.pr={wk:0,lm:0,lmd:7,min:1,seasons:[],hol:[]}),sg=n=>(n>0?'+':'')+n+'%',booked=(pid,ds)=>S.book.some(b=>b.pid==pid&&holds(b)&&b.ci<=ds&&ds<b.co);
+function rateFor(p,ds){const r=PR(p),w=D(ds).getDay(),why=[];let pct=0;
+ if(+r.wk&&(w==5||w==6)){pct+=+r.wk;why.push('Weekend '+sg(+r.wk))}
+ r.seasons.forEach(s=>{if(ds>=s.from&&ds<=s.to){pct+=+s.pct;why.push(s.name+' '+sg(+s.pct))}});
+ r.hol.forEach(h=>{if(h.date==ds){pct+=+h.pct;why.push(h.name+' '+sg(+h.pct))}});
+ const gap=Math.round((D(ds)-D(today()))/864e5);
+ if(+r.lm&&gap>=0&&gap<=+r.lmd&&!booked(p.id,ds)){pct-=+r.lm;why.push('Last-minute -'+r.lm+'%')}
+ return{rate:Math.round(p.rate*(1+pct/100)),why}}
+function extra(b,c){const p=prop(b.pid),money=n=>mp(n,p);let h='';if(b.ci<b.co&&p.id&&b.src!='Blocked'){let s=0,n=0;for(let d=D(b.ci);d<D(b.co);d.setDate(d.getDate()+1)){s+=rateFor(p,iso(d)).rate;n++}
+ const a=Math.round(s/n);h+=`<div>Your pricing rules suggest ${money(a)}/night${a!=b.rate?' (you entered '+money(b.rate)+')':' (matches)'}</div>`;
+ if(c.n<PR(p).min)h+=`<div style="color:var(--bad)">Below the minimum stay of ${PR(p).min} nights</div>`}
+ const gk=gKey($('#f_guest')&&$('#f_guest').value),gi=G()[gk],pr=gk?S.book.filter(x=>x.id!=b.id&&holds(x)&&gKey(x.guest)==gk).length:0;
+ if(pr)h+=`<div>Repeat guest: ${pr} earlier stay${pr>1?'s':''}</div>`;
+ if(gi&&gi.st=='Avoid')h+=`<div style="color:var(--bad)"><b>Marked "do not host again".</b> ${esc(gi.note)}</div>`;else if(gi&&(gi.st=='VIP'||gi.note))h+=`<div>${gi.st=='VIP'?'<b>VIP guest.</b> ':''}${esc(gi.note)}</div>`;
+ return h}
+function vPrice(){if(!S.props.length)return '<h2>Pricing</h2>'+emptyP();
+ const p=S.props.find(x=>x.id==pp)||S.props[0];pp=p.id;const money=n=>mp(n,p);const r=PR(p),T=new Date(),inp=(k,l)=>`<label>${l}<input type=number value="${r[k]}" onchange="prSet('${k}',this.value)"></label>`;
+ let rows='';for(let i=0;i<30;i++){const ds=iso(new Date(T.getFullYear(),T.getMonth(),T.getDate()+i)),x=rateFor(p,ds);
+  rows+=`<tr><td>${D(ds).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}</td><td><b>${money(x.rate)}</b></td><td>${x.why.map(w=>`<span class=tag>${esc(w)}</span>`).join(' ')||'<span style="color:var(--mut)">Base rate</span>'}</td><td>${booked(p.id,ds)?'<span class="tag ok">Booked</span>':'<span class="tag warn">Open</span>'}</td></tr>`}
+ const A=S.book.filter(b=>active(b)&&b.pid==p.id),avg=A.length?A.reduce((s,b)=>s+nights(b),0)/A.length:3,f=1-S.set.fee/100,pn=p.rate*f+(p.clean*f-p.cost)/avg,fx=+p.fixed||0,bn=pn>0?fx/pn:0,bo=Math.round(bn/30*100);
+ let on=0;for(let i=1;i<=30;i++){const ds=iso(new Date(T.getFullYear(),T.getMonth(),T.getDate()-i));if(A.some(b=>b.ci<=ds&&ds<b.co))on++}
+ const ao=Math.round(on/30*100);
+ return `<div class=bar><h2>Pricing</h2><select style="width:auto" onchange="pp=this.value;render()">${S.props.map(x=>`<option value="${x.id}" ${x.id==p.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
+ <p style="color:var(--mut)">Rates come only from the rules you set here. They do not read market data. Base rate: ${money(p.rate)} (change it in Properties).</p>
+ <div class=card><h3>Rules</h3><div class=fg>${inp('wk','Weekend uplift % (Fri and Sat nights)')}${inp('lm','Last-minute discount % (open nights)')}${inp('lmd','Last-minute applies within (days)')}${inp('min','Minimum nights per stay')}</div></div>
+ <div class=grid style="margin-top:14px"><div class=card><h3>Seasons</h3>${r.seasons.map((s,i)=>`<div>${esc(s.name)} · ${fd(s.from)}–${fd(s.to)} · ${sg(+s.pct)} <button class="b s d" onclick="delR('seasons',${i})">x</button></div>`).join('')||'<span style="color:var(--mut)">No seasons yet</span>'}
+ <div class=fg style="margin-top:8px"><label>Name<input id=q_n></label><label>Change %<input type=number id=q_p></label><label>From<input type=date id=q_f></label><label>To<input type=date id=q_t></label></div><p><button class="b s p" onclick="addR('s')">Add season</button></p></div>
+ <div class=card><h3>Holidays and events</h3>${r.hol.map((h,i)=>`<div>${esc(h.name)} · ${fd(h.date)} · ${sg(+h.pct)} <button class="b s d" onclick="delR('hol',${i})">x</button></div>`).join('')||'<span style="color:var(--mut)">No holidays yet</span>'}
+ <div class=fg style="margin-top:8px"><label>Name<input id=q_hn></label><label>Change %<input type=number id=q_hp></label><label class=w>Date<input type=date id=q_d></label></div><p><button class="b s p" onclick="addR('h')">Add holiday</button></p></div></div>
+ <div class=card style="margin-top:14px"><h3>Break-even occupancy</h3>${fx?`<p>You keep about <b>${money(pn)}</b> per booked night after the platform fee and cleaner (based on an average stay of ${avg.toFixed(1)} nights).<br>To cover fixed costs of ${money(fx)} a month you need <b>${Math.ceil(bn)} booked nights, about ${bo}% occupancy</b>.</p><p>Last 30 days: <b>${ao}%</b> occupancy. ${ao>=bo?'<span class="tag ok">Above break-even</span>':'<span class="tag bad">Below break-even</span>'}</p>`:'<p>Add this property\'s fixed monthly costs in Properties to see your break-even.</p>'}</div>
+ <h3 style="margin-top:16px">Suggested rates, next 30 nights</h3><div class=tw><table><tr><th>Night</th><th>Rate</th><th>Why</th><th>Status</th></tr>${rows}</table></div>`}
+function prSet(k,v){PR(S.props.find(x=>x.id==pp))[k]=+v;save();render()}
+function addR(k){const r=PR(S.props.find(x=>x.id==pp));
+ if(k=='s'){const f=$('#q_f').value,t=$('#q_t').value;if(!f||!t||t<f)return toast('Pick a valid date range');r.seasons.push({name:$('#q_n').value.trim()||'Season',from:f,to:t,pct:+$('#q_p').value||0})}
+ else{const d=$('#q_d').value;if(!d)return toast('Pick a date');r.hol.push({name:$('#q_hn').value.trim()||'Holiday',date:d,pct:+$('#q_hp').value||0})}
+ save();render()}
+function delR(k,i){PR(S.props.find(x=>x.id==pp))[k].splice(i,1);save();render()}
+function exportIcs(id){const p=prop(id),z=s=>s.replace(/-/g,''),L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//HostHub//EN'];
+ S.book.filter(b=>b.pid==id&&holds(b)).forEach(b=>L.push('BEGIN:VEVENT','UID:'+b.id+'@hosthub','DTSTAMP:'+z(today())+'T000000Z','DTSTART;VALUE=DATE:'+z(b.ci),'DTEND;VALUE=DATE:'+z(b.co),'SUMMARY:'+(b.src=='Blocked'?'Not available':'Reserved'),'END:VEVENT'));
+ L.push('END:VCALENDAR');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([L.join('\r\n')],{type:'text/calendar'}));a.download=p.name.replace(/\W+/g,'-')+'.ics';a.click();toast('Calendar exported. Guest names are not included.')}
+function icsForm(){if(!S.props.length){toast('Add a property first');return go('props')}
+ M(`<h3>Import calendar (.ics)</h3><p style="color:var(--mut)">Export your calendar as an .ics file from Airbnb, VRBO or Booking.com, then choose it here. Importing the same file again never creates duplicates.</p><div class=fg><label>Property<select id=i_p>${S.props.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></label><label>Source<select id=i_s>${opt(['Airbnb','VRBO','Booking.com','Direct'])}</select></label><label class=w>Calendar file<input type=file id=i_f accept=".ics,text/calendar"></label></div><div class=pv id=i_r>Pick a file to import.</div><p><button class="b p" onclick="icsGo()">Import</button> <button class=b onclick="X()">Close</button></p>`)}
+function icsGo(){const f=$('#i_f').files[0];if(!f)return toast('Choose an .ics file');const r=new FileReader();r.onload=()=>{
+ const T=String(r.result).replace(/\r?\n[ \t]/g,''),pid=$('#i_p').value,src=$('#i_s').value,p=prop(pid);let add=0,skip=0,clk=0,blk=0;
+ T.split('BEGIN:VEVENT').slice(1).forEach(ev=>{const g=k=>{const m=ev.match(new RegExp('\\n'+k+'[^:\\n]*:([^\\r\\n]*)'));return m?m[1].trim():''},
+  dt=s=>{const m=s.match(/(\d{4})(\d\d)(\d\d)/);return m?m[1]+'-'+m[2]+'-'+m[3]:''},u=g('UID'),ci=dt(g('DTSTART')),co=dt(g('DTEND')),sm=g('SUMMARY');
+  if(!ci||!co||co<=ci)return;if(u&&S.book.some(b=>b.ics==u&&b.pid==pid)){skip++;return}
+  const bl=/not available|blocked|unavailable/i.test(sm),b={id:uid(),pid,guest:bl?'Blocked dates':(sm&&!/^reserved$/i.test(sm)?sm:src+' guest'),src:bl?'Blocked':src,ci,co,rate:bl?0:p.rate,clean:bl?0:p.clean,st:'Confirmed',ics:u};
+  if(clash(b))clk++;S.book.push(b);add++;if(bl)blk++});
+ save();render();$('#i_r').innerHTML=`Added ${add} (${blk} blocked dates), skipped ${skip} already imported.`+(clk?` <b style="color:var(--bad)">${clk} overlap an existing booking. Check the Today screen.</b>`:'')+'<br>Imported stays use your default nightly rate. Edit them in Bookings to enter the real amount.'};r.readAsText(f)}
+/* STAGE 3: OPERATIONS */
+let ops='sup';
+const PRI=['Urgent','High','Normal','Low'],DCHK=['Strip and remake beds','Fresh towels set out','Clean bathroom and toilet','Wipe kitchen and empty the fridge','Vacuum and mop floors','Empty bins and fit new liners','Restock toiletries and coffee','Check for damage or lost items','Lock up and reset the door code'],CHK=p=>p.chk||(p.chk=[...DCHK]);
+function logExp(cat,amt,note){S.exp.push({id:uid(),date:today(),cat,amt:+amt,note})}
+const pSel=(id,v)=>`<select id=${id}>${S.props.map(p=>`<option value="${p.id}" ${v==p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`;
+function vOps(){const T=[['sup','Supplies'],['chk','Checklists'],['mnt','Maintenance'],['dmg','Damage log']];
+ return `<h2>Operations</h2><p>${T.map(x=>`<button class="b ${ops==x[0]?'p':''}" onclick="ops='${x[0]}';render()">${x[1]}</button>`).join(' ')}</p>`+({sup:vSup,chk:vChk,mnt:vMnt,dmg:vDmg})[ops]()}
+/* supplies */
+const buyN=s=>Math.max(1,s.min*2-s.qty);
+function vSup(){const low=S.sup.filter(s=>+s.qty<=+s.min);
+ return `<div class=bar><h3>Supplies</h3><button class="b p" onclick="supForm()">Add item</button></div>`+(S.sup.length?`<div class=tw><table><tr><th>Item</th><th>In stock</th><th>Restock at</th><th>Status</th><th></th></tr>`+S.sup.map(s=>`<tr><td>${esc(s.name)}</td><td><button class="b s" onclick="qty('${s.id}',-1)">-</button> <b>${s.qty}</b> <button class="b s" onclick="qty('${s.id}',1)">+</button></td><td>${s.min}</td><td>${+s.qty<=+s.min?'<span class="tag bad">Low</span>':'<span class="tag ok">OK</span>'}</td><td><button class="b s" onclick="supForm('${s.id}')">Edit</button></td></tr>`).join('')+'</table></div>':'<div class="card empty">Track toiletries, linen and coffee. Add your first item.</div>')
+ +`<h3 style="margin-top:18px">Shopping list</h3>`+(low.length?`<div class=card>${low.map(s=>`<div>${buyN(s)} x ${esc(s.name)} (${money(buyN(s)*s.cost)})</div>`).join('')}<p><b>Estimated total ${money(low.reduce((t,s)=>t+buyN(s)*s.cost,0))}</b></p><button class=b onclick="copyList()">Copy list</button> <button class="b p" onclick="bought()">I bought these</button></div>`:'<div class=card>Nothing to buy. Every item is above its restock level.</div>')}
+function qty(id,d){const s=S.sup.find(x=>x.id==id);s.qty=Math.max(0,+s.qty+d);save();render()}
+function copyList(){const t=S.sup.filter(s=>+s.qty<=+s.min).map(s=>'- '+buyN(s)+' x '+s.name).join('\n');try{navigator.clipboard.writeText(t)}catch(e){}toast('Shopping list copied')}
+function bought(){const L=S.sup.filter(s=>+s.qty<=+s.min);if(!L.length)return;const tot=L.reduce((t,s)=>t+buyN(s)*s.cost,0);
+ if(tot>0)logExp('Supplies',tot.toFixed(2),'Restock: '+L.map(s=>s.name).join(', '));L.forEach(s=>s.qty=Math.max(1,s.min*2));save();render();toast('Stock updated'+(tot>0?' and expense logged':''))}
+function supForm(id){const s=S.sup.find(x=>x.id==id)||{name:'',qty:0,min:5,cost:0};
+ M(`<h3>${id?'Edit':'Add'} supply</h3><div class=fg><label class=w>Item<input id=u_n value="${esc(s.name)}"></label><label>In stock<input type=number id=u_q value="${s.qty}"></label><label>Restock when at or below<input type=number id=u_m value="${s.min}"></label><label class=w>Cost per unit<input type=number step=0.01 id=u_c value="${s.cost}"></label></div><p><button class="b p" onclick="saveSup('${id||''}')">Save item</button> <button class=b onclick="X()">Cancel</button> ${id?`<button class="b d" onclick="del('sup','${id}')">Delete</button>`:''}</p>`)}
+function saveSup(id){const s={name:$('#u_n').value.trim(),qty:+$('#u_q').value||0,min:+$('#u_m').value||0,cost:+$('#u_c').value||0};if(!s.name)return toast('Enter an item name');if(id)Object.assign(S.sup.find(x=>x.id==id),s);else{s.id=uid();S.sup.push(s)}save();X();render()}
+/* checklists */
+function vChk(){if(!S.props.length)return emptyP();const p=S.props.find(x=>x.id==pp)||S.props[0];pp=p.id;
+ return `<div class=bar><h3>Cleaner checklist</h3><select style="width:auto" onchange="pp=this.value;render()">${S.props.map(x=>`<option value="${x.id}" ${x.id==p.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div><p style="color:var(--mut)">Cleaners tick these off from the Cleanings tab. Finishing the list marks the clean done.</p><div class=card>${CHK(p).map((x,i)=>`<div>${esc(x)} <button class="b s d" onclick="chkDel(${i})">x</button></div>`).join('')}<div class=fg style="margin-top:10px"><label class=w>New step<input id=k_n></label></div><p><button class="b s p" onclick="chkAdd()">Add step</button> <button class="b s" onclick="chkReset()">Reset to default</button></p></div>`}
+const cp=()=>CHK(S.props.find(x=>x.id==pp));
+function chkAdd(){const v=$('#k_n').value.trim();if(v){cp().push(v);save();render()}}
+function chkDel(i){cp().splice(i,1);save();render()}
+function chkReset(){S.props.find(x=>x.id==pp).chk=[...DCHK];save();render()}
+function chkForm(id){const b=S.book.find(x=>x.id==id),p=prop(b.pid),c=b.chk||{};
+ M(`<h3>${esc(p.name)} · clean on ${fd(b.co)}</h3>${CHK(p).map((x,i)=>`<label style="display:flex;gap:8px;padding:6px 0"><input type=checkbox style="width:auto" ${c[i]?'checked':''} onchange="tick('${id}',${i},this.checked)">${esc(x)}</label>`).join('')}<p><button class="b p" onclick="X()">Close</button></p>`)}
+function tick(id,i,v){const b=S.book.find(x=>x.id==id);(b.chk=b.chk||{})[i]=v;const all=CHK(prop(b.pid)).every((x,j)=>b.chk[j]);if(all&&!b.cleaned){b.cleaned=true;toast('Checklist complete. Clean marked done.')}save();render()}
+function cpay(id){const b=S.book.find(x=>x.id==id);b.cpaid=!b.cpaid;save();render()}
+/* maintenance */
+function vMnt(){const o={Urgent:0,High:1,Normal:2,Low:3},L=[...S.mnt].sort((a,b)=>(a.st=='Done')-(b.st=='Done')||o[a.pri]-o[b.pri]||((a.due||'9')<(b.due||'9')?-1:1)),op=S.mnt.filter(m=>m.st!='Done');
+ return `<div class=bar><h3>Maintenance jobs</h3><button class="b p" onclick="mntForm()">New job</button></div><div class=grid><div class="card stat"><b>${op.length}</b><span>open jobs</span></div><div class="card stat"><b>${money(op.reduce((s,m)=>s+ +m.cost,0))}</b><span>estimated cost of open jobs</span></div></div>`+(L.length?`<div class=tw><table><tr><th>Job</th><th>Property</th><th>Priority</th><th>Status</th><th>Due</th><th>Cost</th><th></th></tr>`+L.map(m=>`<tr><td>${esc(m.title)}</td><td>${esc(prop(m.pid).name)}</td><td><span class="tag ${m.pri=='Urgent'?'bad':m.pri=='High'?'warn':''}">${m.pri}</span></td><td>${m.st}</td><td>${m.due?(m.due<today()&&m.st!='Done'?'<b style="color:var(--bad)">Overdue ':'')+fd(m.due)+(m.due<today()&&m.st!='Done'?'</b>':''):'-'}</td><td>${money(m.cost)}</td><td><button class="b s" onclick="mntForm('${m.id}')">Edit</button> ${m.st!='Done'?`<button class="b s p" onclick="mDone('${m.id}')">Done</button>`:''}</td></tr>`).join('')+'</table></div>':'<div class="card empty">No jobs logged. Add repairs as soon as a guest or cleaner reports them.</div>')}
+function mntForm(id){if(!S.props.length){toast('Add a property first');return go('props')}const m=S.mnt.find(x=>x.id==id)||{pid:S.props[0].id,title:'',pri:'Normal',st:'Open',due:'',cost:0};
+ M(`<h3>${id?'Edit':'New'} job</h3><div class=fg><label class=w>Job<input id=j_t value="${esc(m.title)}"></label><label>Property${pSel('j_p',m.pid)}</label><label>Priority<select id=j_r>${opt(PRI,m.pri)}</select></label><label>Status<select id=j_s>${opt(['Open','In progress','Done'],m.st)}</select></label><label>Due date<input type=date id=j_d value="${m.due||''}"></label><label class=w>Estimated or actual cost<input type=number step=0.01 id=j_c value="${m.cost}"></label></div><p><button class="b p" onclick="saveMnt('${id||''}')">Save job</button> <button class=b onclick="X()">Cancel</button> ${id?`<button class="b d" onclick="del('mnt','${id}')">Delete</button>`:''}</p>`)}
+function saveMnt(id){const m={pid:$('#j_p').value,title:$('#j_t').value.trim(),pri:$('#j_r').value,st:$('#j_s').value,due:$('#j_d').value,cost:+$('#j_c').value||0};if(!m.title)return toast('Describe the job');
+ let o;if(id){o=S.mnt.find(x=>x.id==id);Object.assign(o,m)}else{o=Object.assign(m,{id:uid()});S.mnt.push(o)}finishM(o);save();X();render()}
+function finishM(m){if(m.st=='Done'&&!m.logged&&m.cost>0&&confirm('Log '+money(m.cost)+' as a repairs expense?')){logExp('Repairs',m.cost,m.title);m.logged=true}}
+function mDone(id){const m=S.mnt.find(x=>x.id==id);m.st='Done';finishM(m);save();render()}
+/* damage log */
+function vDmg(){const L=[...S.dmg].sort((a,b)=>a.date<b.date?1:-1),tot=L.reduce((s,d)=>s+ +d.cost,0),rec=L.filter(d=>d.claim=='Recovered').reduce((s,d)=>s+ +d.cost,0);
+ return `<div class=bar><h3>Damage log</h3><button class="b p" onclick="dmgForm()">Log damage</button></div><div class=grid><div class="card stat"><b>${money(tot)}</b><span>total damage cost</span></div><div class="card stat"><b>${money(rec)}</b><span>recovered from guests or the platform</span></div></div>`+(L.length?`<div class=tw><table><tr><th>Date</th><th>Property</th><th>Guest</th><th>What happened</th><th>Cost</th><th>Claim</th><th></th></tr>`+L.map(d=>{const b=S.book.find(x=>x.id==d.bid);return `<tr><td>${fd(d.date)}</td><td>${esc(prop(d.pid).name)}</td><td>${b?esc(b.guest):'-'}</td><td>${esc(d.desc)}</td><td>${money(d.cost)}</td><td><span class="tag ${d.claim=='Recovered'?'ok':d.claim=='Claimed'?'warn':''}">${d.claim}</span></td><td><button class="b s" onclick="dmgForm('${d.id}')">Edit</button></td></tr>`}).join('')+'</table></div>':'<div class="card empty">No damage logged. Record it with the date and guest so you have evidence for a claim.</div>')}
+function dmgForm(id){if(!S.props.length){toast('Add a property first');return go('props')}const d=S.dmg.find(x=>x.id==id)||{pid:S.props[0].id,bid:'',date:today(),desc:'',cost:0,claim:'Not claimed'};
+ M(`<h3>${id?'Edit':'Log'} damage</h3><div class=fg><label>Property${pSel('g_p',d.pid)}</label><label>Guest booking<select id=g_b><option value="">Not linked</option>${[...S.book].sort((a,b)=>a.ci<b.ci?1:-1).map(b=>`<option value="${b.id}" ${d.bid==b.id?'selected':''}>${esc(b.guest)} · ${fd(b.ci)}</option>`).join('')}</select></label><label>Date<input type=date id=g_d value="${d.date}"></label><label>Repair or replace cost<input type=number step=0.01 id=g_c value="${d.cost}"></label><label class=w>What happened<input id=g_t value="${esc(d.desc)}"></label><label class=w>Claim status<select id=g_s>${opt(['Not claimed','Claimed','Recovered','Absorbed'],d.claim)}</select></label></div><p><button class="b p" onclick="saveDmg('${id||''}')">Save</button> <button class=b onclick="X()">Cancel</button> ${id?`<button class="b d" onclick="del('dmg','${id}')">Delete</button>`:''}</p>`)}
+function saveDmg(id){const bid=$('#g_b').value,bk=S.book.find(x=>x.id==bid),d={pid:bk?bk.pid:$('#g_p').value,bid,date:$('#g_d').value,desc:$('#g_t').value.trim(),cost:+$('#g_c').value||0,claim:$('#g_s').value};
+ if(!d.desc)return toast('Describe the damage');if(id)Object.assign(S.dmg.find(x=>x.id==id),d);else{d.id=uid();S.dmg.push(d)}save();X();render()}
+/* STAGE 4: GUESTS, ISSUES, REPORTS */
+const gKey=n=>String(n||'').trim().toLowerCase(),G=()=>S.gst||(S.gst={}),I=()=>S.iss||(S.iss=[]);
+let gt='g',ry=null;
+const ICATS=['Wi-Fi','Cleanliness','Noise','Check-in or access','Heating or cooling','Hot water','Appliances','Bed or comfort','Parking or location','Other'];
+function guestList(){const m={};S.book.filter(active).forEach(b=>{const k=gKey(b.guest);if(!k)return;const g=m[k]||(m[k]={k,name:b.guest,n:0,nt:0,paid:0,last:''}),c=calc(b);g.n++;g.nt+=c.n;g.paid+=c.gross;if(b.co>g.last)g.last=b.co});
+ Object.keys(G()).forEach(k=>{if(!m[k])m[k]={k,name:k,n:0,nt:0,paid:0,last:''}});return Object.values(m).sort((a,b)=>b.n-a.n||(a.last<b.last?1:-1))}
+function vGuest(){return `<h2>Guests</h2><p>${[['g','Guest book'],['i','Issue tracker']].map(x=>`<button class="b ${gt==x[0]?'p':''}" onclick="gt='${x[0]}';render()">${x[1]}</button>`).join(' ')}</p>`+(gt=='g'?vGB():vIssues())}
+function vGB(){const L=guestList();if(!L.length)return '<div class="card empty">Guests appear here as you add bookings. Open a guest to add a note or mark them VIP.</div>';
+ return `<p style="color:var(--mut)">Notes show up in the booking form when you type the same guest name again.</p><div class=tw><table><tr><th>Guest</th><th>Stays</th><th>Nights</th><th>Paid</th><th>Last stay</th><th>Status</th><th>Note</th><th></th></tr>`+L.map((g,i)=>{const x=G()[g.k]||{st:'Normal',note:''};return `<tr><td>${esc(g.name)}</td><td>${g.n}${g.n>1?' <span class="tag ok">Repeat</span>':''}</td><td>${g.nt}</td><td>${money(g.paid)}</td><td>${g.last?fd(g.last):'-'}</td><td><span class="tag ${x.st=='VIP'?'ok':x.st=='Avoid'?'bad':''}">${x.st=='Avoid'?'Do not host again':x.st}</span></td><td style="white-space:normal;min-width:180px">${esc(x.note)}</td><td><button class="b s" onclick="gForm(${i})">Edit</button></td></tr>`}).join('')+'</table></div>'}
+function gForm(i){const g=guestList()[i],x=G()[g.k]||{st:'Normal',note:''};
+ M(`<h3>${esc(g.name)}</h3><div class=fg><label class=w>Status<select id=n_s>${[['Normal','Normal'],['VIP','VIP'],['Avoid','Do not host again']].map(o=>`<option value="${o[0]}" ${x.st==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></label><label class=w>Private note<textarea id=n_n style="min-height:90px">${esc(x.note)}</textarea></label></div><p><button class="b p" onclick="saveG('${esc(g.k).replace(/'/g,'&#39;')}')">Save</button> <button class=b onclick="X()">Cancel</button></p>`)}
+function saveG(k){const st=$('#n_s').value,note=$('#n_n').value.trim();if(st=='Normal'&&!note)delete G()[k];else G()[k]={st,note};save();X();render()}
+function repIss(){const lim=iso(new Date(Date.now()-90*864e5)),m={};I().filter(x=>x.date>=lim).forEach(x=>{const k=x.pid+'|'+x.cat;m[k]=(m[k]||0)+1});return Object.keys(m).filter(k=>m[k]>=2).map(k=>({pid:k.split('|')[0],cat:k.split('|')[1],n:m[k]}))}
+function vIssues(){const R2=repIss(),L=[...I()].sort((a,b)=>a.date<b.date?1:-1);
+ return `<div class=bar><h3>Issue tracker</h3><button class="b p" onclick="issForm()">Log issue</button></div><p style="color:var(--mut)">Log every complaint, review comment or problem your cleaner finds. When the same issue returns twice in 90 days, it is flagged as a repeat so you fix the cause.</p>`
+ +(R2.length?R2.map(r=>`<div class="al bad"><b>Repeat issue:</b> ${esc(r.cat)} at ${esc(prop(r.pid).name)} (${r.n} times in 90 days) <button class="b s p" onclick="fixJob('${r.pid}','${esc(r.cat)}')">Create fix job</button></div>`).join(''):'<div class=card>No repeat issues in the last 90 days.</div>')
+ +`<h3 style="margin-top:16px">All issues</h3>`+(L.length?`<div class=tw><table><tr><th>Date</th><th>Property</th><th>Category</th><th>Source</th><th>What happened</th><th></th></tr>`+L.map(x=>`<tr><td>${fd(x.date)}</td><td>${esc(prop(x.pid).name)}</td><td>${esc(x.cat)}</td><td>${esc(x.src)}</td><td style="white-space:normal">${esc(x.note)}</td><td><button class="b s" onclick="issForm('${x.id}')">Edit</button></td></tr>`).join('')+'</table></div>':'<div class="card empty">No issues logged yet.</div>')}
+function issForm(id){if(!S.props.length){toast('Add a property first');return go('props')}const x=I().find(y=>y.id==id)||{pid:S.props[0].id,date:today(),cat:ICATS[0],src:'Guest message',note:''};
+ M(`<h3>${id?'Edit':'Log'} issue</h3><div class=fg><label>Property${pSel('v_p',x.pid)}</label><label>Date<input type=date id=v_d value="${x.date}"></label><label>Category<select id=v_c>${opt(ICATS,x.cat)}</select></label><label>Reported by<select id=v_s>${opt(['Guest message','Review','Cleaner report','Own check'],x.src)}</select></label><label class=w>What happened<input id=v_n value="${esc(x.note)}"></label></div><p><button class="b p" onclick="saveIss('${id||''}')">Save issue</button> <button class=b onclick="X()">Cancel</button> ${id?`<button class="b d" onclick="del('iss','${id}')">Delete</button>`:''}</p>`)}
+function saveIss(id){const x={pid:$('#v_p').value,date:$('#v_d').value,cat:$('#v_c').value,src:$('#v_s').value,note:$('#v_n').value.trim()};if(!x.note)return toast('Describe what happened');
+ if(id)Object.assign(I().find(y=>y.id==id),x);else{x.id=uid();I().push(x)}save();X();render()}
+function fixJob(pid,cat){S.mnt.push({id:uid(),pid,title:'Fix repeat issue: '+cat,pri:'High',st:'Open',due:iso(new Date(Date.now()+3*864e5)),cost:0});save();toast('Job added in Operations > Maintenance')}
+/* reports */
+function repData(y){const A=S.book.filter(b=>active(b)&&b.co.slice(0,4)==y),E=S.exp.filter(e=>e.date.slice(0,4)==y),T={g:0,f:0,c:0,n:0,d:0};
+ A.forEach(b=>{const c=calc(b);T.g+=c.gross;T.f+=c.fee;T.c+=c.cost;T.d+=c.n});const cat={};E.forEach(e=>cat[e.cat]=(cat[e.cat]||0)+ +e.amt);const te=E.reduce((s,e)=>s+ +e.amt,0);
+ return{A,E,T,cat,te,ded:T.f+T.c+te,profit:T.g-T.f-T.c-te}}
+const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+function dlCsv(name,rows){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv'}));a.download=name+'-'+ry+'.csv';a.click()}
+function csvB(){const d=repData(ry);dlCsv('bookings',[['Guest','Property','Source','Check-in','Check-out','Nights','Status','Nightly rate','Cleaning fee','Guest pays','Platform fee','Cleaner cost','You keep'],...d.A.map(b=>{const c=calc(b);return[b.guest,prop(b.pid).name,b.src,b.ci,b.co,c.n,b.st,b.rate,b.clean,c.gross.toFixed(2),c.fee.toFixed(2),c.cost.toFixed(2),c.net.toFixed(2)]})])}
+function csvE(){const d=repData(ry);dlCsv('expenses',[['Date','Category','Note','Amount'],...d.E.map(e=>[e.date,e.cat,e.note,(+e.amt).toFixed(2)])])}
+function csvS(){const d=repData(ry);dlCsv('summary',[['Line','Amount'],['Guest payments',d.T.g.toFixed(2)],['Platform fees',(-d.T.f).toFixed(2)],['Cleaner costs',(-d.T.c).toFixed(2)],...Object.keys(d.cat).map(k=>[k,(-d.cat[k]).toFixed(2)]),['Profit estimate',d.profit.toFixed(2)]])}
+function vRep(){const yrs=[...new Set([today().slice(0,4),...S.book.map(b=>b.co.slice(0,4)),...S.exp.map(e=>e.date.slice(0,4))])].sort().reverse();ry=yrs.includes(ry)?ry:yrs[0];
+ const d=repData(ry),mo=Array.from({length:12},(_,i)=>{const k=ry+'-'+String(i+1).padStart(2,'0'),bs=d.A.filter(b=>b.co.slice(0,7)==k),g=bs.reduce((s,b)=>s+calc(b).gross,0),fc=bs.reduce((s,b)=>{const c=calc(b);return s+c.fee+c.cost},0),ex=d.E.filter(e=>e.date.slice(0,7)==k).reduce((s,e)=>s+ +e.amt,0);
+  return{m:new Date(+ry,i,1).toLocaleString(undefined,{month:'short'}),n:bs.reduce((s,b)=>s+nights(b),0),g,c:fc+ex,p:g-fc-ex}}),
+ pr=S.props.map(p=>{const bs=d.A.filter(b=>b.pid==p.id),r=bs.reduce((o,b)=>{const c=calc(b);o.g+=c.gross;o.c+=c.fee+c.cost;o.d+=c.n;return o},{g:0,c:0,d:0});return{p,r}}),tb=(h,rows)=>`<div class=tw><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${rows}</table></div>`;
+ return `<div class=bar><h2>Annual report ${ry}</h2><span class=noprint><select style="width:auto;display:inline-block" onchange="ry=this.value;render()">${yrs.map(y=>`<option ${y==ry?'selected':''}>${y}</option>`).join('')}</select> <button class="b p" onclick="locked('Print and PDF export')">Print or save as PDF</button></span></div>
+ <p style="color:var(--mut)">${esc(S.set.name||'Host')} · income and costs are counted in the year of check-out. Rates and fees are as entered in the app.</p>
+ <p class=noprint><button class=b onclick="csvB()">Bookings CSV</button> <button class=b onclick="csvE()">Expenses CSV</button> <button class=b onclick="csvS()">Summary CSV</button></p>
+ <div class=grid><div class="card stat"><b>${money(d.T.g)}</b><span>guest payments</span></div><div class="card stat"><b>${money(d.ded)}</b><span>costs to deduct</span></div><div class="card stat"><b>${money(d.profit)}</b><span>profit estimate</span></div><div class="card stat"><b>${d.T.d}</b><span>nights hosted</span></div></div>
+ <h3>Income and costs</h3>${tb(['Line','Amount'],`<tr><td>Guest payments (stay and cleaning fees)</td><td>${money(d.T.g)}</td></tr><tr><td>Platform fees</td><td>-${money(d.T.f)}</td></tr><tr><td>Cleaner costs</td><td>-${money(d.T.c)}</td></tr>`+Object.keys(d.cat).map(k=>`<tr><td>${esc(k)}</td><td>-${money(d.cat[k])}</td></tr>`).join('')+`<tr><td><b>Profit estimate</b></td><td><b>${money(d.profit)}</b></td></tr>`)}
+ <h3 style="margin-top:16px">By property</h3>${tb(['Property','Nights','Guest pays','Costs','Profit'],pr.map(({p,r})=>`<tr><td>${esc(p.name)}</td><td>${r.d}</td><td>${money(r.g)}</td><td>${money(r.c)}</td><td><b>${money(r.g-r.c)}</b></td></tr>`).join(''))}
+ <p style="color:var(--mut)">Property profit is before shared expenses in the expense log.</p>
+ <h3 style="margin-top:16px">By month</h3>${tb(['Month','Nights','Guest pays','Costs','Profit'],mo.map(x=>`<tr><td>${x.m}</td><td>${x.n}</td><td>${money(x.g)}</td><td>${money(x.c)}</td><td>${money(x.p)}</td></tr>`).join(''))}
+ <p style="color:var(--mut);margin-top:14px">This report is a bookkeeping summary, not tax advice. Share the CSV files with your accountant and check local rules.</p>`}
+/* STAGE 5: SETUP, TOUR, HOUSE MANUAL, CURRENCY */
+const mp=(n,p)=>((p&&p.cur)||S.set.cur)+Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+function wiz(n){const s=S.set;
+ if(n==1)M(`<h3>Welcome to HostHub</h3><p>Three quick steps and you are ready. You can change everything later.</p><div class=fg><label class=w>Your name<input id=w_n value="${esc(s.name)}"></label><label>Currency symbol<input id=w_c value="${esc(s.cur)}" maxlength=3></label><label>Platform fee %<input type=number id=w_f step=0.1 value="${s.fee}"></label></div><p><button class="b p" onclick="wizS(1)">Next</button> <button class=b onclick="skipW()">Skip setup</button></p>`);
+ else if(n==2)M(`<h3>Add your first property</h3><div class=fg><label class=w>Listing name<input id=w_pn></label><label>Nightly rate<input type=number id=w_pr value=100></label><label>Cleaning fee charged<input type=number id=w_pc value=40></label><label class=w>What your cleaner costs you<input type=number id=w_pk value=30></label></div><p><button class="b p" onclick="wizS(2)">Next</button> <button class=b onclick="wiz(1)">Back</button></p>`);
+ else M(`<h3>You are all set</h3><p>Add your first booking next. Today, Calendar, Cleanings and Reports fill in on their own.</p><p><button class="b p" onclick="skipW();tour(0)">Take the quick tour</button> <button class=b onclick="skipW();go('book')">Add a booking</button> <button class=b onclick="skipW();sample()">Explore with sample data</button></p>`)}
+function wizS(n){const s=S.set;if(n==1){s.name=$('#w_n').value.trim();s.cur=$('#w_c').value||'$';s.fee=+$('#w_f').value||0;save();return wiz(2)}
+ const nm=$('#w_pn').value.trim();if(!nm)return toast('Enter a listing name');S.props.push({id:uid(),name:nm,rate:+$('#w_pr').value||0,clean:+$('#w_pc').value||0,cost:+$('#w_pk').value||0,wifi:'',code:'',notes:'',fixed:0,cur:s.cur,fx:1});save();render();wiz(3)}
+function skipW(){S.set.done=true;save();X();render()}
+const TOUR=[['today','Today','Your daily dashboard: arrivals, departures, alerts and this month\'s profit.'],['book','Bookings','Add every stay here. Clashes and short stays are flagged before you save. You can also import an .ics calendar.'],['cal','Calendar','All your properties on one colour-coded month view.'],['clean','Cleanings','Every checkout creates a clean. Tick the checklist, then mark your cleaner paid.'],['price','Pricing','Set weekend, season and last-minute rules and see your break-even occupancy.'],['guest','Guests','Keep notes on guests and spot problems that keep repeating.'],['man','House manual','Build a printable guest manual for each property.'],['rep','Reports','Yearly profit, CSV files for your accountant and a print-ready PDF.'],['set','Settings','Change your theme and fee here, and save a backup every month.']];
+function tour(i){const x=TOUR[i];if(!x){$('#tour').innerHTML='';return}X();view=x[0];render();$('#tour').innerHTML=`<div class=tour><b>${x[1]} (${i+1}/${TOUR.length})</b>${x[2]}<br>${i?`<button class="b s" onclick="tour(${i-1})">Back</button> `:''}<button class="b s p" onclick="tour(${i+1})">${i==TOUR.length-1?'Finish':'Next'}</button> <button class="b s" onclick="tour(99)">Close</button></div>`}
+const MAN=[['cin','Check-in time and process'],['cout','Check-out time and steps'],['phone','Host phone and emergency contacts'],['rules','House rules'],['appl','Appliances and how to use them'],['trash','Rubbish and recycling'],['tips','Local tips (food, transport, shops)']];
+function manBlocks(p){const m=p.man||{},o=[];if(p.wifi)o.push(['Wi-Fi',p.wifi]);if(p.code)o.push(['Door or lockbox code',p.code]);if(p.notes)o.push(['Arrival notes',p.notes]);MAN.forEach(x=>{if(m[x[0]])o.push([x[1],m[x[0]]])});return o}
+function vMan(){if(!S.props.length)return '<h2>House manual</h2>'+emptyP();const p=S.props.find(x=>x.id==pp)||S.props[0];pp=p.id;const m=p.man||(p.man={}),B=manBlocks(p);
+ return `<div class="bar noprint"><h2>House manual</h2><span><select style="width:auto;display:inline-block" onchange="pp=this.value;render()">${S.props.map(x=>`<option value="${x.id}" ${x.id==p.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select> <button class="b p" onclick="locked('Print and PDF export')">Print or save as PDF</button> <button class=b onclick="copyMan()">Copy text</button></span></div>
+ <div class="card noprint"><p style="color:var(--mut)">Fill in what applies. Empty sections are left out. Wi-Fi, door code and arrival notes come from the property.</p><div class=fg>${MAN.map(x=>`<label class=w>${x[1]}<textarea style="min-height:70px" onchange="manSet('${x[0]}',this.value)">${esc(m[x[0]])}</textarea></label>`).join('')}</div></div>
+ <div class=card style="margin-top:14px"><h2>Welcome to ${esc(p.name)}</h2>${B.map(b=>`<h3>${esc(b[0])}</h3><p style="white-space:pre-wrap;margin-top:0">${esc(b[1])}</p>`).join('')||'<p style="color:var(--mut)">Fill in the sections above and your manual appears here.</p>'}<p style="color:var(--mut)">We hope you enjoy your stay.${S.set.name?' '+esc(S.set.name):''}</p></div>`}
+function manSet(k,v){const p=S.props.find(x=>x.id==pp);(p.man=p.man||{})[k]=v;save();render()}
+function copyMan(){const p=S.props.find(x=>x.id==pp),t='Welcome to '+p.name+'\n\n'+manBlocks(p).map(b=>b[0]+'\n'+b[1]).join('\n\n');try{navigator.clipboard.writeText(t)}catch(e){}toast('House manual copied')}
+const IC={today:'M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',book:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 16l2 2 4-4',cal:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',clean:'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',ops:'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z',guest:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',money:'M3 7a2 2 0 0 1 2-2h14v4M3 7v11a2 2 0 0 0 2 2h16V9H5a2 2 0 0 1-2-2zM17 14h.01',price:'M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01',rep:'M3 3v18h18M7 16v-5M12 16V7M17 16v-8',msg:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',man:'M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z',props:'M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4',set:'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6',more:'M5 12h.01M12 12h.01M19 12h.01'};
+const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[k]}"/></svg>`;let lastV;
+function navHtml(){const nb=n=>`<button ${view==n[0]?'class="on" aria-current="page"':''} onclick="go('${n[0]}')">${ico(n[0])}<span>${n[1]}</span></button>`,P=['today','book','cal','clean'];
+ return `<div class=logo><i><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${IC.today}"/></svg></i><span>HostHub<small>Host command centre</small></span></div><div class=np>${NAV.filter(n=>P.includes(n[0])).map(nb).join('')}<button class=more aria-label="More sections" onclick="$('#nav').classList.toggle('open')">${ico('more')}<span>More</span></button></div><div class=ns>${NAV.filter(n=>!P.includes(n[0])).map(nb).join('')}</div>`}
+/* DEMO VERSION: locks and limits */
+const BUY_URL='#';
+function locked(f){M(`<h3>Full version feature</h3><p>${f} is included in the full version of HostHub.</p><p><a class="b p" target="_blank" rel="noopener" href="${BUY_URL}">Get the full version</a> <button class=b onclick="X()">Keep exploring</button></p>`)}
+const LK={backup:'Backup',restore:'Restore backup',icsForm:'Calendar import',exportIcs:'Calendar export',csvB:'CSV export',csvE:'CSV export',csvS:'CSV export'};
+Object.keys(LK).forEach(n=>{window[n]=()=>locked(LK[n])});
+const _sP=saveProp,_sB=saveBook,_sE=saveExp;
+window.saveProp=id=>!id&&S.props.length>=2?locked('More than 2 properties'):_sP(id);
+window.saveBook=id=>!id&&S.book.length>=10?locked('More than 10 bookings'):_sB(id);
+window.saveExp=()=>S.exp.length>=8?locked('More than 8 expenses'):_sE();
+window.wipe=()=>{if(confirm('Reset the demo to its sample data?'))sample()};
+$('#buy').href=BUY_URL;
+load();S.set.bk=today();if(!S.props.length)sample();else render();
+</script></body></html>
